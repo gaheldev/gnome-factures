@@ -1,0 +1,240 @@
+%======================================
+% TODO
+%======================================
+
+
+%======================================
+% search for EDIT
+%======================================
+
+
+% meilleure mention de la nature de la facture ?
+
+% optionnel : numero de secu
+% optionnel : droits d'auteur et de reproduction
+
+%======================================
+% CF: infos legales
+%======================================
+
+% https://www.lamaisondesartistes.fr/site/identification-fiscale-sociale/facturation/
+% https://www.secu-artistes-auteurs.fr/mag-facture-artiste-auteur
+% https://www.economie.gouv.fr/entreprises/factures-mentions-obligatoires
+
+% La dispense de précompte sera envoyée automatiquement en fin d'année civile par l'Urssaf. 
+% En cas de nouvelle affiliation, la notification d'immatriculation vaut pour dispense.
+
+
+%======================================
+% PREAMBULE
+%======================================
+
+\documentclass[sansTVA,sansremise]{facture}
+% TEMPLATE devis / facture
+{{#if invoice.is_devis}}
+\type{ Devis }
+{{else}}
+\type{ Facture }
+{{/if}}
+
+% TEMPLATE
+% for reproducible compilation of generated .tex file
+% so we don't need to store pdf file in git repo
+% format: \date{JJ/MM/AAAA}
+\date{ {{{invoice.date}}} }
+
+\usepackage[top=2 cm, bottom=2 cm, left=1.5 cm, right=2.5 cm]{geometry}
+\usepackage[nomath]{libertinus-otf}
+\usepackage{tabularx}
+\usepackage{pdfpages}
+\usepackage[most]{tcolorbox}
+
+% Cette commande permet de supprimer l'indentation en début de
+% paragraphe qui n'a pas de sens dans une facture qui n'en contient pas
+\setlength\parindent{0cm}
+
+% Permet d'afficher plusieurs lignes dans produit
+\def\arraystretch{0.85}
+\newcommand{\multiligne}[3]{
+	\ligne{
+		\rule{0pt}{1.8em} % add some vertical padding
+		\begin{tabular}{@{}l@{}}
+			#1
+		\end{tabular} 
+		\vspace{0.1cm} % add some vertical padding
+	}[#2]{#3}
+}
+
+
+% \definecolor{entetes}{HTML}{F28D79} % salmon
+\definecolor{entetes}{HTML}{B8A960} % kaki
+\definecolor{encadre}{HTML}{B8A960}
+\color{darkgray}
+
+\newtcolorbox[auto counter]{signature}[1][]{%
+    enhanced,
+    breakable,
+    colback=white,
+	colbacktitle=brown!88!green!74,
+    coltitle=darkgray,
+    fonttitle=\bfseries,
+    boxrule=.6pt,
+    titlerule=.2pt,
+    toptitle=3pt,
+    bottomtitle=3pt,
+    title=#1,
+    }
+
+%======================================
+% EDIT
+%======================================
+
+% \type{Devis}
+
+% TEMPLATE number
+\numero{ {{{invoice.number}}} }
+
+% si adresse de facturation = addresse du diffuseur:
+	\renewcommand{\livraison}{} % supprimer adresse de livraison
+	\renewcommand{\facturation}{Client} % supprimer adresse de livraison
+% sinon donner les informations sur le diffuseur:
+	% \renewcommand{\livraison}{Diffuseur (client)}
+	% \dest{Martin Dupont\\ 5 rue machin}
+
+
+% adresse de facturation
+\fact{\\%
+% TEMPLATE
+{{{invoice.client.name}}} \\
+% TEMPLATE
+{{{invoice.client.address.number_and_street}}} \\
+% TEMPLATE
+{{{invoice.client.address.postcode}}} {{{invoice.client.address.city}}} \\
+% TEMPLATE
+{{#if invoice.client.siret}} n° SIRET : {{{invoice.client.siret}}} \\ {{/if}}
+}
+
+
+%======================================
+% Pas besoin d'editer
+%======================================
+
+% TEMPLATE
+\nomemet{ {{{invoice.author.title}}} }
+% TEMPLATE
+\adresseemet{\textbf{\libelle{ {{{invoice.author.name}}} }} \\
+\vspace{0.2cm} \\
+% TEMPLATE
+{{{invoice.author.address.number_and_street}}} \\
+% TEMPLATE
+{{{invoice.author.address.postcode}}} {{{invoice.author.address.city}}} \\
+\vspace{0.2cm} \\
+% TEMPLATE
+n° SIRET: {{{invoice.author.siret}}} \\
+% TEMPLATE
+code APE: {{{invoice.author.ape}}} \\
+\vspace{0.2cm} \\
+% TEMPLATE
+{{#if invoice.author.email}}
+{{{invoice.author.email}}} \\
+{{/if}}
+% 06 87 64 61 77 \\
+}
+
+% TEMPLATE
+{{#if invoice.author.iban}}
+\pied{\it \color{darkgray} Règlement par virement - IBAN : {{{invoice.author.iban}}} }
+{{/if}}
+
+\datelimite{30}
+
+
+
+%======================================
+% Debut du document
+%======================================
+
+\begin{document}
+\entete
+\renewcommand{\largeurDescriptif}{0.5\textwidth}
+
+\begin{facture}
+	% EDIT
+	% \ligne{nature de l'oeuvre}[quantité]{prix unitaire}
+	% \multiligne{nature de l'oeuvre}{quantité}{prix unitaire}
+
+	% TEMPLATE products
+	{{#each invoice.products}}
+	\multiligne{
+		\textbf{\libelle{ {{{name}}} }} \\
+		{{#if description}} {{{description}}} \\ {{/if}} 
+	}{ {{{quantity}}} }{ {{{frfloat price}}} }
+	{{/each}}
+	
+\end{facture}
+
+\vspace{0.6cm}
+% EDIT
+
+% TEMPLATE nature
+{{#if invoice.nature}}
+\textbf{\large\libelle{Nature}} \\
+{{{multiline invoice.nature}}}
+{{/if}}
+
+% TEMPLATE précompte
+{{#if invoice.diffuseur}}
+\vspace{0.6cm}
+\textbf{\large\libelle{Précompte}} \\
+Dispensé de précompte,  voir page 3
+{{/if}}
+
+
+
+%======================================
+% Informations suplementaires
+%======================================
+
+\vspace{2cm}
+\vfill
+
+\textbf{\libelle{Règlement de la facture}} \\
+{
+	\small \it \color{gray}
+	Date limite de règlement maximum 30 jours à date de facturation. En cas de retard de paiement, les pénalités s’élèvent à 10\% du montant de la facture. L’indemnité forfaitaire pour frais de recouvrement est de 40 euros.\\
+}
+
+% TEMPLATE contributions diffuseur
+{{#if invoice.diffuseur}}
+\textbf{\libelle{Contributions diffuseur (client)}} \\
+{
+	\small \it \color{gray}
+	Ces contributions venant financer le régime de sécurité sociale des artistes-auteurs sont obligatoires. Elle sont dues à l'Urssaf Limousin par le diffuseur (client). En savoir plus : www.secu-artistes-auteurs.fr/diffuseur \\
+
+	\fpMul{\secu}{\tot}{0,01}
+	\fpMul{\formpro}{\tot}{0,001}
+	\fpAdd{\contribs}{\secu}{\formpro}
+
+	\begin{tabularx}{\textwidth}{@{\hspace{0.3cm}} X r @{\hspace{0.2cm}}}
+		Contribution Sécurité sociale (1\% du montant total) & \numprint[\unite]{\secu} \\
+		Contribution Formation professionnelle (0,1\% du montant total)	& \numprint[\unite]{\formpro} \\
+	\end{tabularx} 
+
+	\hfill \rule{1.5cm}{0.5pt} \hspace{0.1cm} \\
+
+	\vspace{-0.3cm} \hfill Total: \numprint[\unite]{\contribs} \hspace{0.1cm}
+}
+{{/if}}
+
+
+
+%======================================
+% Dispense de précompte
+%======================================
+
+% TEMPLATE document dispense de précompte
+{{#if invoice.diffuseur}}
+{{{includepdf invoice.dispense_path}}}
+{{/if}}
+
+\end{document}

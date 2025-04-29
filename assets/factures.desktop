@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Exec=gnome-factures
+Name=Factures
+Comment=Edit invoices
+Icon=emblem-documents-symbolic
+Categories=Office;
