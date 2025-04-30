@@ -1,11 +1,14 @@
 use adw::prelude::*;
 use relm4::prelude::*;
 
+use crate::CFG;
+
 
 #[derive(Default,Clone)]
 pub struct BillingModel {
     bill_type: BillType,
     number: String,
+    last_number: Option<String>,
     nature: String,
     diffuseur: bool,
     dispense_file_name: String,
@@ -114,9 +117,16 @@ impl SimpleComponent for BillingModel {
 
                 add = &adw::EntryRow {
                     set_title: "N°",
+                    set_tooltip: &{
+                        if let Some(last) = &model.last_number {
+                            format!("dernière facture: {}", last)
+                        } else {
+                            "utiliser 001 ou <prefix>001".to_string()
+                        }
+                    },
                     connect_changed[sender] => move |entry_row| {
                         let _ = sender.output(BillingOutput::Number(entry_row.property("text")));
-                    }
+                    },
                 },
             },
 
@@ -170,6 +180,7 @@ impl SimpleComponent for BillingModel {
     ) -> ComponentParts<Self> {
         let model = BillingModel {
             dispense_file_name: params.dispense_name,
+            last_number: CFG.lock().unwrap().last_facture.clone(),
             ..BillingModel::default()
         };
 

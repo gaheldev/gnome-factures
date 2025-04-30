@@ -12,7 +12,7 @@ pub struct Config {
     pub tex_output_path: String,
     pub pdf_output_path: String,
     pub clients: HashMap<ClientName, Client>,
-    pub last_facture: u32,
+    pub last_facture: Option<String>,
     pub last_dispense: Option<PathBuf>,
 }
 
@@ -25,7 +25,7 @@ impl ::std::default::Default for Config {
             tex_output_path: "/home/gael/code/tools/compta/facture-gahel/facture.tex".to_string(),
             pdf_output_path: "/home/gael/code/tools/compta/facture-gahel/facture.pdf".to_string(),
             clients: HashMap::new(),
-            last_facture: 0,
+            last_facture: None,
             last_dispense: None,
         }
     }
