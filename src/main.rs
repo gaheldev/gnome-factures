@@ -1,3 +1,5 @@
+use std::sync::{LazyLock, Mutex};
+
 use relm4::prelude::*;
 
 mod app;
@@ -7,9 +9,10 @@ mod config;
 
 const APP_NAME: &str = "gnome-factures";
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let cfg = config::Config::load_with_check(APP_NAME)?;
+pub type ConfigSingleton = LazyLock<Mutex<config::Config>>;
+pub static CFG: ConfigSingleton = LazyLock::new(|| Mutex::new(config::Config::load_with_check(APP_NAME).unwrap()));
 
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // create app
     adw::init().expect("Failed to initialize libadwaita");
 
@@ -29,7 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = RelmApp::new(APP_NAME);
 
     // run app main loop
-    app.run::<app::AppModel>(cfg);
+    app.run::<app::AppModel>(());
 
     Ok(())
 }

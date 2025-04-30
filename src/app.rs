@@ -22,6 +22,7 @@ use products_view::ProductsModel;
 pub use billing_view::{BillType, BillingModel, BillingOutput, BillingInput};
 use crate::{latex::{InvoiceData, PdfFile, Template}, APP_NAME};
 use pdf_viewer::{PdfViewerModel, PdfViewerMsg};
+use crate::CFG;
 
 
 static DIALOG_BROKER: MessageBroker<BillingInput> = MessageBroker::new();
@@ -58,7 +59,6 @@ enum UpToDate {
 }
 
 pub(crate) struct AppModel {
-    app_config: crate::config::Config,
     max_parallel_jobs: u64,
     compile_count: u64,
     last_compilation: Instant,
@@ -96,7 +96,7 @@ impl Display for AppModel {
 impl SimpleComponent for AppModel {
     type Input = AppMsg;
     type Output = ();
-    type Init = crate::config::Config;
+    type Init = ();
 
     view! {
         #[root]
@@ -232,10 +232,12 @@ impl SimpleComponent for AppModel {
 
     /// Initialize the UI and model.
     fn init(
-        cfg: Self::Init,
+        _init: Self::Init,
         window: Self::Root,
         sender: ComponentSender<Self>,
     ) -> relm4::ComponentParts<Self> {
+
+        let cfg = CFG.lock().unwrap().clone();
 
         let author_view: Controller<AuthorFormModel> =
         AuthorFormModel::builder()
@@ -279,7 +281,6 @@ impl SimpleComponent for AppModel {
             .forward(sender.input_sender(), |_| { AppMsg::Null });
 
         let model = AppModel {
-            app_config: cfg.clone(),
             // TODO: make it configurable
             max_parallel_jobs: 5,
             compile_count: 0,
@@ -320,8 +321,8 @@ impl SimpleComponent for AppModel {
             AppMsg::AuthorEdited(author) => {
                 self.status = UpToDate::None;
                 self.author = author;
-                self.app_config.author = Some(self.author.clone());
-                confy::store(APP_NAME, None, self.app_config.clone()).unwrap();
+                CFG.lock().unwrap().author = Some(self.author.clone());
+                confy::store(APP_NAME, None, CFG.lock().unwrap().clone()).unwrap();
             }
             AppMsg::ClientEdited(client) => {
                 self.status = UpToDate::None;
@@ -334,6 +335,7 @@ impl SimpleComponent for AppModel {
             AppMsg::BillNumberChanged(number) => {
                 self.status = UpToDate::None;
                 self.number = number;
+                CFG.lock().unwrap().last_facture = Some(self.number.clone());
             }
             AppMsg::BillNature(nature) => {
                 self.status = UpToDate::None;
@@ -346,8 +348,8 @@ impl SimpleComponent for AppModel {
             AppMsg::DispenseSelected(filepath) => {
                 self.status = UpToDate::None;
                 self.dispense = filepath;
-                self.app_config.last_dispense = self.dispense.clone();
-                confy::store(APP_NAME, None, self.app_config.clone()).unwrap();
+                CFG.lock().unwrap().last_dispense = self.dispense.clone();
+                confy::store(APP_NAME, None, CFG.lock().unwrap().clone()).unwrap();
 
                 let filename = match &self.dispense {
                     Some(filepath) => filepath.to_str().unwrap().to_string(),
@@ -367,17 +369,17 @@ impl SimpleComponent for AppModel {
             }
             AppMsg::Export => {
                 // add client to the list of clients
-                self.app_config.clients.insert(self.client.name.clone(), self.client.clone());
-                confy::store(APP_NAME, None, self.app_config.clone()).unwrap();
+                CFG.lock().unwrap().clients.insert(self.client.name.clone(), self.client.clone());
+                confy::store(APP_NAME, None, CFG.lock().unwrap().clone()).unwrap();
 
                 // In case the pdf wasn't already compiled in background
                 if let UpToDate::None = self.status {
                     self.pdf = Some(Template::new()
                         .fill(self.invoice())
                         .expect("Error filling template")
-                        .to_file(&self.app_config.tex_output_path)
+                        .to_file(&CFG.lock().unwrap().tex_output_path)
                         .expect("Error writing tex file")
-                        .export(&self.app_config.pdf_output_path)
+                        .export(&CFG.lock().unwrap().pdf_output_path)
                         .expect("Error exporting pdf file")
                     );
                     self.status = UpToDate::Pdf;
@@ -385,12 +387,12 @@ impl SimpleComponent for AppModel {
                 if let UpToDate::Pdf = self.status {
                     self.pdf.as_ref()
                         .unwrap()
-                        .export(&self.app_config.pdf_output_path)
+                        .export(&CFG.lock().unwrap().pdf_output_path)
                         .expect("Error copying pdf file");
                     Template::new()
                         .fill(self.invoice())
                         .expect("Error filling template")
-                        .to_file(&self.app_config.tex_output_path)
+                        .to_file(&CFG.lock().unwrap().tex_output_path)
                         .expect("Error exporting tex file");
                     self.status = UpToDate::All;
                 }
