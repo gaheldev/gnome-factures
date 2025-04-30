@@ -277,23 +277,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "facture-gui"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "confy",
- "gtk4",
- "handlebars",
- "libadwaita",
- "open",
- "poppler-rs",
- "relm4",
- "relm4-components",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "field-offset"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -574,6 +557,23 @@ checksum = "a8928869a44cfdd1fccb17d6746e4ff82c8f82e41ce705aa026a52ca8dc3aefb"
 dependencies = [
  "libc",
  "system-deps",
+]
+
+[[package]]
+name = "gnome-factures"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "confy",
+ "gtk4",
+ "handlebars",
+ "libadwaita",
+ "open",
+ "poppler-rs",
+ "relm4",
+ "relm4-components",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
