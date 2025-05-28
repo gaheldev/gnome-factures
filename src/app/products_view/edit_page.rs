@@ -73,19 +73,43 @@ impl SimpleComponent for Model {
                             } @name_handler,
                         },
 
-                        #[name(description)]
-                        add = &adw::EntryRow {
-                            set_title: "Description",
+                        // #[name(description)]
+                        // add = &adw::EntryRow {
+                        //     set_title: "Description",
+                        //
+                        //     #[track(!model.editing)]
+                        //     #[block_signal(description_handler)]
+                        //     set_text: &model.product.description,
+                        //
+                        //     connect_changed[sender] => move |row| {
+                        //         sender.input(Input::DescriptionChanged(row.property("text")));
+                        //     } @description_handler
+                        // },
+                    },
 
-                            #[track(!model.editing)]
-                            #[block_signal(description_handler)]
-                            set_text: &model.product.description,
+                    add = &adw::PreferencesGroup {
+                        set_title: "Description",
 
-                            connect_changed[sender] => move |row| {
-                                sender.input(Input::DescriptionChanged(row.property("text")));
-                            } @description_handler
+                        add = &gtk::TextView {
+                            set_height_request: 200,
+                            set_wrap_mode: gtk::WrapMode::Word,
+                            inline_css: "border-radius: 14px; padding: 10px",
+
+                            #[wrap(Some)]
+                            set_buffer = &gtk::TextBuffer {
+                                // TODO: check that this works without track and block signal
+                                // #[track(!model.editing)]
+                                // #[block_signal(description_handler)]
+                                set_text: &model.product.description,
+
+                                connect_changed[sender] => move |entry| {
+                                    sender.input(Input::DescriptionChanged(entry.property("text")));
+                                } @description_handler
+                            },
                         },
+                    },
 
+                    add = &adw::PreferencesGroup {
                         #[name(quantity)]
                         add = &adw::SpinRow {
                             set_title: "Quantity",

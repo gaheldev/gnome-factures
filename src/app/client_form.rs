@@ -80,6 +80,7 @@ pub(crate) enum ClientFormInput {
     TVAICCEdited(String),
 }
 
+// FIXME: sometimes crash when clicking existing client on load
 #[relm4::component(pub(crate))]
 impl SimpleComponent for ClientFormModel {
     type Init = Vec<Client>;

@@ -140,8 +140,8 @@ fn latex_to_pdf(latex_content: &str) -> Result<PdfFile, Box<dyn std::error::Erro
         .output()?;
     
     // Print the full output for debugging
-    println!("STDOUT: {}", String::from_utf8_lossy(&output.stdout));
-    println!("STDERR: {}", String::from_utf8_lossy(&output.stderr));
+    // println!("STDOUT: {}", String::from_utf8_lossy(&output.stdout));
+    // println!("STDERR: {}", String::from_utf8_lossy(&output.stderr));
     
     if !output.status.success() {
         println!("Some errors occured during xelatex command");
@@ -222,7 +222,7 @@ fn override_braces(h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContex
 }
 
 /// convert multiline string for latex
-///     "\n" -> "\\"
+///     "\n" -> "\\\n"
 fn multiline(h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut dyn Output) -> Result<(), RenderError> {
     let param = h.param(0).ok_or(
         RenderErrorReason::ParamNotFoundForIndex(
