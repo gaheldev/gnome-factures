@@ -186,6 +186,13 @@ code APE: {{{invoice.author.ape}}} \\
 {{{multiline invoice.nature}}}
 {{/if}}
 
+% TEMPLATE durée de validité devis
+{{#if invoice.is_devis}}
+\vspace{0.6cm}
+\textbf{\large\libelle{Durée de validité}} \\
+Le devis est valable pour une durée de 30 jours.
+{{/if}}
+
 % TEMPLATE précompte
 {{#if invoice.diffuseur}}
 \vspace{0.6cm}
@@ -193,7 +200,7 @@ code APE: {{{invoice.author.ape}}} \\
 Dispensé de précompte,  voir page 3
 {{/if}}
 
-% TEMPLATE devis
+% TEMPLATE bon pour accord
 {{#if invoice.is_devis}}
 \vspace{0.6cm}
 \begin{minipage}{0.45\textwidth}
