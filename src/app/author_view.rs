@@ -106,49 +106,51 @@ impl SimpleComponent for AuthorFormModel {
             #[name(edit_group)]
             add = &adw::PreferencesGroup {
                 add = &adw::EntryRow {
-                    set_title: "Titre",
+                    set_title: "Nom *",
                     set_text: &model.author.title,
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::TitleEdited(entry_row.property("text")));
                     }
                 },
                 add = &adw::EntryRow {
-                    set_title: "Nom",
+                    set_title: "Raison Sociale *",
                     set_text: &model.author.name,
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::NameEdited(entry_row.property("text")));
                     }
                 },
                 add = &adw::EntryRow {
-                    set_title: "Rue",
+                    set_title: "Rue *",
                     set_text: &model.author.address.number_and_street,
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::StreetEdited(entry_row.property("text")));
                     }
                 },
                 add = &adw::EntryRow {
-                    set_title: "Code Postal",
+                    set_title: "Code Postal *",
                     set_text: &model.author.address.postcode,
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::PostcodeEdited(entry_row.property("text")));
                     }
                 },
                 add = &adw::EntryRow {
-                    set_title: "Ville",
+                    set_title: "Ville *",
                     set_text: &model.author.address.city,
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::CityEdited(entry_row.property("text")));
                     }
                 },
+            },
+            add = &adw::PreferencesGroup {
                 add = &adw::EntryRow {
-                    set_title: "SIRET",
+                    set_title: "SIRET *",
                     set_text: &model.author.siret,
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::SiretEdited(entry_row.property("text")));
                     }
                 },
                 add = &adw::EntryRow {
-                    set_title: "Code APE",
+                    set_title: "Code APE *",
                     set_text: &model.author.ape,
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::ApeEdited(entry_row.property("text")));
@@ -168,6 +170,8 @@ impl SimpleComponent for AuthorFormModel {
                         sender.input(AuthorFormInput::IbanEdited(entry_row.property("text")));
                     }
                 },
+            },
+            add = &adw::PreferencesGroup {
                 add = &adw::ActionRow {
                         set_title: "Signature",
                         #[watch]
