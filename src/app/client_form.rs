@@ -177,7 +177,7 @@ impl SimpleComponent for ClientFormModel {
                 },
 
                 add = &adw::EntryRow {
-                    set_title: "Name",
+                    set_title: "Name *",
 
                     #[watch]
                     set_editable: model.editing && !model.existing,
@@ -192,7 +192,7 @@ impl SimpleComponent for ClientFormModel {
                 },
 
                 add = &adw::EntryRow {
-                    set_title: "Address",
+                    set_title: "Address *",
 
                     #[watch]
                     set_editable: model.editing,
@@ -207,7 +207,7 @@ impl SimpleComponent for ClientFormModel {
                 },
 
                 add = &adw::EntryRow {
-                    set_title: "Postcode",
+                    set_title: "Postcode *",
 
                     #[watch]
                     set_editable: model.editing,
@@ -222,7 +222,7 @@ impl SimpleComponent for ClientFormModel {
                 },
 
                 add = &adw::EntryRow {
-                    set_title: "City",
+                    set_title: "City *",
 
                     #[watch]
                     set_editable: model.editing,
@@ -242,7 +242,9 @@ impl SimpleComponent for ClientFormModel {
                 //         sender.input(ClientFormInput::CountryEdited(entry_row.property("text")));
                 //     }
                 // },
+            },
 
+            add = &adw::PreferencesGroup {
                 add = &adw::EntryRow {
                     set_title: "SIRET",
 
