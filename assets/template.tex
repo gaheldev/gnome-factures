@@ -112,6 +112,10 @@
 {{{invoice.client.address.postcode}}} {{{invoice.client.address.city}}} \\
 % TEMPLATE
 {{#if invoice.client.siret}} n° SIRET : {{{invoice.client.siret}}} \\ {{/if}}
+% TEMPLATE
+{{#if invoice.client.tva}} n° TVA : {{{invoice.client.tva}}} \\ {{/if}}
+% TEMPLATE
+{{#if invoice.client.tva_icc}} n° TVAICC : {{{invoice.client.tva_icc}}} \\ {{/if}}
 }
 
 

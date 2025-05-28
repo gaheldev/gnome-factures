@@ -2,7 +2,7 @@ use std::fmt;
 
 use adw::prelude::*;
 use relm4::prelude::*;
-use relm4_components::simple_adw_combo_row::{SimpleComboRow};
+use relm4_components::simple_adw_combo_row::SimpleComboRow;
 
 
 pub type ClientName = String;
@@ -30,6 +30,8 @@ pub struct Client {
     pub name: ClientName,
     pub address: Address,
     pub siret: String,
+    pub tva: Option<String>,
+    pub tva_icc: Option<String>,
 }
 impl Client {
     pub(crate) fn valid(&self) -> bool {
@@ -74,7 +76,8 @@ pub(crate) enum ClientFormInput {
     CityEdited(String),
     // CountryEdited(String),
     SiretEdited(String),
-    // TVAEdited(String),
+    TVAEdited(String),
+    TVAICCEdited(String),
 }
 
 #[relm4::component(pub(crate))]
@@ -254,6 +257,36 @@ impl SimpleComponent for ClientFormModel {
                         sender.input(ClientFormInput::SiretEdited(entry_row.property("text")));
                     } @siret_handler
                 },
+
+                add = &adw::EntryRow {
+                    set_title: "TVA",
+
+                    #[watch]
+                    set_editable: model.editing,
+
+                    #[track(!model.editing)]
+                    #[block_signal(siret_handler)]
+                    set_text: if let Some(tva) = &model.edited_client.tva { tva } else { "" },
+
+                    connect_changed[sender] => move |entry_row| {
+                        sender.input(ClientFormInput::TVAEdited(entry_row.property("text")));
+                    } @tva_handler
+                },
+
+                add = &adw::EntryRow {
+                    set_title: "TVA intracommunautaire",
+
+                    #[watch]
+                    set_editable: model.editing,
+
+                    #[track(!model.editing)]
+                    #[block_signal(siret_handler)]
+                    set_text: if let Some(tva) = &model.edited_client.tva_icc { tva } else { "" },
+
+                    connect_changed[sender] => move |entry_row| {
+                        sender.input(ClientFormInput::TVAICCEdited(entry_row.property("text")));
+                    } @tva_icc_handler
+                },
             },
         },
 
@@ -318,6 +351,14 @@ impl SimpleComponent for ClientFormModel {
             ClientFormInput::SiretEdited(value) => {
                 self.edited_client.siret = value;
                 let _ = sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone()));
+            }
+            ClientFormInput::TVAEdited(value) => {
+                self.edited_client.tva = if value.is_empty() { None } else { Some(value) };
+                sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone())).unwrap();
+            }
+            ClientFormInput::TVAICCEdited(value) => {
+                self.edited_client.tva_icc = if value.is_empty() { None } else { Some(value) };
+                sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone())).unwrap();
             }
             ClientFormInput::ClientSelected(index) => {
                 self.edited_client = self.client_list[index].clone();
