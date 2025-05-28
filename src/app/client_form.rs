@@ -29,7 +29,7 @@ impl Address {
 pub struct Client {
     pub name: ClientName,
     pub address: Address,
-    pub siret: String,
+    pub siret: Option<String>,
     pub tva: Option<String>,
     pub tva_icc: Option<String>,
 }
@@ -253,7 +253,7 @@ impl SimpleComponent for ClientFormModel {
 
                     #[track(!model.editing)]
                     #[block_signal(siret_handler)]
-                    set_text: &model.edited_client.siret,
+                    set_text: if let Some(siret) = &model.edited_client.siret { siret } else { "" },
 
                     connect_changed[sender] => move |entry_row| {
                         sender.input(ClientFormInput::SiretEdited(entry_row.property("text")));
@@ -351,7 +351,7 @@ impl SimpleComponent for ClientFormModel {
             //     let _ = sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone()));
             // }
             ClientFormInput::SiretEdited(value) => {
-                self.edited_client.siret = value;
+                self.edited_client.siret = if value.is_empty() { None } else { Some(value) };
                 let _ = sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone()));
             }
             ClientFormInput::TVAEdited(value) => {
