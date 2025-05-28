@@ -268,7 +268,7 @@ impl SimpleComponent for ClientFormModel {
                     set_editable: model.editing,
 
                     #[track(!model.editing)]
-                    #[block_signal(siret_handler)]
+                    #[block_signal(tva_handler)]
                     set_text: if let Some(tva) = &model.edited_client.tva { tva } else { "" },
 
                     connect_changed[sender] => move |entry_row| {
@@ -283,7 +283,7 @@ impl SimpleComponent for ClientFormModel {
                     set_editable: model.editing,
 
                     #[track(!model.editing)]
-                    #[block_signal(siret_handler)]
+                    #[block_signal(tva_icc_handler)]
                     set_text: if let Some(tva) = &model.edited_client.tva_icc { tva } else { "" },
 
                     connect_changed[sender] => move |entry_row| {
