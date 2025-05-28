@@ -68,6 +68,8 @@ impl SimpleComponent for Model {
                             #[block_signal(name_handler)]
                             set_text: &model.product.name,
 
+                            #[watch] set_css_classes: if model.product.name.is_empty() { &["error"] } else { &[""] },
+
                             connect_changed[sender] => move |row| {
                                 sender.input(Input::NameChanged(row.property("text")));
                             } @name_handler,

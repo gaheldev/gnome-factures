@@ -108,6 +108,8 @@ impl SimpleComponent for AuthorFormModel {
                 add = &adw::EntryRow {
                     set_title: "Nom *",
                     set_text: &model.author.title,
+                    #[watch] set_css_classes: if model.author.title.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::TitleEdited(entry_row.property("text")));
                     }
@@ -115,6 +117,8 @@ impl SimpleComponent for AuthorFormModel {
                 add = &adw::EntryRow {
                     set_title: "Raison Sociale *",
                     set_text: &model.author.name,
+                    #[watch] set_css_classes: if model.author.name.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::NameEdited(entry_row.property("text")));
                     }
@@ -122,6 +126,8 @@ impl SimpleComponent for AuthorFormModel {
                 add = &adw::EntryRow {
                     set_title: "Rue *",
                     set_text: &model.author.address.number_and_street,
+                    #[watch] set_css_classes: if model.author.address.number_and_street.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::StreetEdited(entry_row.property("text")));
                     }
@@ -129,6 +135,8 @@ impl SimpleComponent for AuthorFormModel {
                 add = &adw::EntryRow {
                     set_title: "Code Postal *",
                     set_text: &model.author.address.postcode,
+                    #[watch] set_css_classes: if model.author.address.postcode.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::PostcodeEdited(entry_row.property("text")));
                     }
@@ -136,6 +144,8 @@ impl SimpleComponent for AuthorFormModel {
                 add = &adw::EntryRow {
                     set_title: "Ville *",
                     set_text: &model.author.address.city,
+                    #[watch] set_css_classes: if model.author.address.city.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::CityEdited(entry_row.property("text")));
                     }
@@ -145,6 +155,8 @@ impl SimpleComponent for AuthorFormModel {
                 add = &adw::EntryRow {
                     set_title: "SIRET *",
                     set_text: &model.author.siret,
+                    #[watch] set_css_classes: if model.author.siret.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::SiretEdited(entry_row.property("text")));
                     }
@@ -152,6 +164,8 @@ impl SimpleComponent for AuthorFormModel {
                 add = &adw::EntryRow {
                     set_title: "Code APE *",
                     set_text: &model.author.ape,
+                    #[watch] set_css_classes: if model.author.ape.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(AuthorFormInput::ApeEdited(entry_row.property("text")));
                     }

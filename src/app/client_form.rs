@@ -187,6 +187,8 @@ impl SimpleComponent for ClientFormModel {
                     #[block_signal(name_handler)]
                     set_text: &model.edited_client.name,
 
+                    #[watch] set_css_classes: if model.edited_client.name.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(ClientFormInput::NameEdited(entry_row.property("text")));
                     } @name_handler
@@ -201,6 +203,8 @@ impl SimpleComponent for ClientFormModel {
                     #[track(!model.editing)]
                     #[block_signal(address_handler)]
                     set_text: &model.edited_client.address.number_and_street,
+
+                    #[watch] set_css_classes: if model.edited_client.address.number_and_street.is_empty() { &["error"] } else { &[""] },
 
                     connect_changed[sender] => move |entry_row| {
                         sender.input(ClientFormInput::StreetEdited(entry_row.property("text")));
@@ -217,6 +221,8 @@ impl SimpleComponent for ClientFormModel {
                     #[block_signal(postcode_handler)]
                     set_text: &model.edited_client.address.postcode,
 
+                    #[watch] set_css_classes: if model.edited_client.address.postcode.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
                         sender.input(ClientFormInput::PostcodeEdited(entry_row.property("text")));
                     } @postcode_handler
@@ -231,6 +237,8 @@ impl SimpleComponent for ClientFormModel {
                     #[track(!model.editing)]
                     #[block_signal(city_handler)]
                     set_text: &model.edited_client.address.city,
+
+                    #[watch] set_css_classes: if model.edited_client.address.city.is_empty() { &["error"] } else { &[""] },
 
                     connect_changed[sender] => move |entry_row| {
                         sender.input(ClientFormInput::CityEdited(entry_row.property("text")));

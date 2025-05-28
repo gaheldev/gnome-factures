@@ -32,6 +32,7 @@ pub struct BillingInit {
 pub enum BillingInput {
     Type(BillType),
     Diffuseur(bool),
+    Number(String),
     /// dispense file name
     Dispense(String),
 }
@@ -124,8 +125,10 @@ impl SimpleComponent for BillingModel {
                             "utiliser 001 ou <prefix>001".to_string()
                         }
                     },
+                    #[watch] set_css_classes: if model.number.is_empty() { &["error"] } else { &[""] },
+
                     connect_changed[sender] => move |entry_row| {
-                        let _ = sender.output(BillingOutput::Number(entry_row.property("text")));
+                        sender.input(BillingInput::Number(entry_row.property("text")));
                     },
                 },
             },
@@ -197,6 +200,10 @@ impl SimpleComponent for BillingModel {
             BillingInput::Diffuseur(value) => {
                 self.diffuseur = value;
                 sender.output(BillingOutput::Diffuseur(self.diffuseur)).unwrap();
+            }
+            BillingInput::Number(number) => {
+                self.number = number;
+                sender.output(BillingOutput::Number(self.number.clone())).unwrap();
             }
             BillingInput::Dispense(filename) => self.dispense_file_name = filename,
         }
