@@ -79,6 +79,7 @@ impl Template {
         reg.register_helper("frfloat", Box::new(french_float));
         reg.register_helper("multiline", Box::new(multiline));
         reg.register_helper("includepdf", Box::new(includepdf));
+        reg.register_helper("override_braces", Box::new(override_braces));
         reg.set_dev_mode(true);  // This enables alternative delimiters
         Ok(Template {
             content: reg.render_template(&self.content, &data)?,
@@ -189,6 +190,30 @@ fn includepdf(h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, ou
 
     // Format with comma as decimal separator
     let formatted = format!("\\includepdf{{{}}}", content);
+
+    // Write the formatted string to output
+    out.write(&formatted)?;
+
+    Ok(())
+}
+
+/// replace {{content}} with actual latex {content}
+/// -> workaround delimiter error (can't use space in \includepdf{}
+fn override_braces(h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut dyn Output) -> Result<(), RenderError> {
+    let param = h.param(0).ok_or(
+        RenderErrorReason::ParamNotFoundForIndex(
+            "override_braces helper requires at least one parameter",
+            0,
+    ))?;
+
+    let content = param.value().as_str().ok_or(
+        RenderErrorReason::InvalidParamType(
+            "override_braces helper requires a string parameter",
+    ))?;
+
+    // Format with comma as decimal separator
+    // let formatted = format!("\\includegraphics[width=0.3\\textwidth]{{{}}}", content);
+    let formatted = format!("{{{}}}", content);
 
     // Write the formatted string to output
     out.write(&formatted)?;

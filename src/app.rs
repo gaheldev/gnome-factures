@@ -14,7 +14,7 @@ mod products_view;
 mod billing_view;
 mod pdf_viewer;
 
-pub use author_view::{Author, AuthorFormOutput, AuthorFormModel};
+pub use author_view::{Author, AuthorFormInput, AuthorFormOutput, AuthorFormModel};
 pub use product::Product;
 use client_form::{ClientFormModel, ClientFormOutput};
 pub use client_form::{Client, ClientName};
@@ -25,11 +25,14 @@ use pdf_viewer::{PdfViewerModel, PdfViewerMsg};
 use crate::CFG;
 
 
-static DIALOG_BROKER: MessageBroker<BillingInput> = MessageBroker::new();
+static BILLING_DIALOG_BROKER: MessageBroker<BillingInput> = MessageBroker::new();
+static AUTHOR_DIALOG_BROKER: MessageBroker<AuthorFormInput> = MessageBroker::new();
 
 #[derive(Debug)]
 pub(crate) enum AppMsg {
     AuthorEdited(Author),
+    SignatureSelected(Option<PathBuf>),
+    PickSignature,
     BillTypeChanged(BillType),
     BillNumberChanged(String),
     BillNature(String),
@@ -46,6 +49,7 @@ pub(crate) enum AppMsg {
     PdfCompiled(PdfFile),
     CompilationError(String),
 
+    ResetShowSignatureDialog,
     ResetShowDispenseDialog,
     /// does nothing
     Null,
@@ -72,6 +76,7 @@ pub(crate) struct AppModel {
     pdf_viewer: Controller<PdfViewerModel>,
     is_form_valid: bool,
     status: UpToDate,
+    show_signature_dialog: bool,
     show_dispense_dialog: bool,
     show_pdf: bool,
     pdf: Option<PdfFile>,
@@ -216,10 +221,31 @@ impl SimpleComponent for AppModel {
                 .modal(true)
                 .build();
 
+            let snd = sender.clone();
             dialog.open(Some(&widgets.window),
                 Some(&Cancellable::new()),
                 move |file| {
-                    sender.input(AppMsg::DispenseSelected(
+                    snd.input(AppMsg::DispenseSelected(
+                        match file {
+                            Ok(gtk_file) => Some(gtk_file.path().unwrap()),
+                            Err(_) => None,
+                    }
+                    ));
+                },
+            );
+        }
+
+        if model.show_signature_dialog {
+            sender.input(AppMsg::ResetShowSignatureDialog);
+            let dialog = gtk::FileDialog::builder()
+                .title("Pick signature file")
+                .modal(true)
+                .build();
+
+            dialog.open(Some(&widgets.window),
+                Some(&Cancellable::new()),
+                move |file| {
+                    sender.input(AppMsg::SignatureSelected(
                         match file {
                             Ok(gtk_file) => Some(gtk_file.path().unwrap()),
                             Err(_) => None,
@@ -241,9 +267,10 @@ impl SimpleComponent for AppModel {
 
         let author_view: Controller<AuthorFormModel> =
         AuthorFormModel::builder()
-            .launch(cfg.author.clone())
+            .launch_with_broker(cfg.author.clone(), &AUTHOR_DIALOG_BROKER)
             .forward(sender.input_sender(), |msg| match msg {
                 AuthorFormOutput::AuthorEdited(author) => AppMsg::AuthorEdited(author),
+                AuthorFormOutput::PickSignature => AppMsg::PickSignature,
             });
 
         let billing_init = BillingInit {
@@ -255,7 +282,7 @@ impl SimpleComponent for AppModel {
 
         let billing_view: Controller<BillingModel> =
         BillingModel::builder()
-            .launch_with_broker(billing_init, &DIALOG_BROKER)
+            .launch_with_broker(billing_init, &BILLING_DIALOG_BROKER)
             .forward(sender.input_sender(), |msg| match msg {
                 BillingOutput::Type(bill_type) => AppMsg::BillTypeChanged(bill_type),
                 BillingOutput::Number(number) => AppMsg::BillNumberChanged(number),
@@ -296,6 +323,7 @@ impl SimpleComponent for AppModel {
             pdf_viewer,
             is_form_valid: false,
             status: UpToDate::None,
+            show_signature_dialog: false,
             show_dispense_dialog: false,
             show_pdf: true,
             pdf: None,
@@ -345,6 +373,10 @@ impl SimpleComponent for AppModel {
                 self.status = UpToDate::None;
                 self.diffuseur = is_diffuseur;
             }
+            AppMsg::SignatureSelected(filepath) => {
+                let signature = filepath.map(|filepath| filepath.to_str().unwrap().to_string());
+                AUTHOR_DIALOG_BROKER.send(AuthorFormInput::Signature(signature));
+            }
             AppMsg::DispenseSelected(filepath) => {
                 self.status = UpToDate::None;
                 self.dispense = filepath;
@@ -355,10 +387,16 @@ impl SimpleComponent for AppModel {
                     Some(filepath) => filepath.to_str().unwrap().to_string(),
                     None => "".to_string(),
                 };
-                DIALOG_BROKER.send(BillingInput::Dispense(filename));
+                BILLING_DIALOG_BROKER.send(BillingInput::Dispense(filename));
+            }
+            AppMsg::PickSignature => {
+                self.show_signature_dialog = true
             }
             AppMsg::PickDispense => {
                 self.show_dispense_dialog = true;
+            }
+            AppMsg::ResetShowSignatureDialog => {
+                self.show_signature_dialog = false;
             }
             AppMsg::ResetShowDispenseDialog => {
                 self.show_dispense_dialog = false;

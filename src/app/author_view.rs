@@ -36,6 +36,7 @@ pub struct Author {
     pub ape: String,
     pub email: Option<String>,
     pub iban: Option<String>,
+    pub signature_file_name: Option<String>,
 }
 impl Author {
     pub(crate) fn valid(&self) -> bool {
@@ -61,6 +62,7 @@ pub struct AuthorFormModel {
 #[derive(Debug)]
 pub enum AuthorFormOutput {
     AuthorEdited(Author),
+    PickSignature,
 }
 
 #[derive(Debug)]
@@ -76,6 +78,7 @@ pub enum AuthorFormInput {
     EmailEdited(String),
     // TVAEdited(String),
     IbanEdited(String),
+    Signature(Option<String>),
 }
 
 /// entry_row!("Name", NameEdited)
@@ -165,6 +168,18 @@ impl SimpleComponent for AuthorFormModel {
                         sender.input(AuthorFormInput::IbanEdited(entry_row.property("text")));
                     }
                 },
+                add = &adw::ActionRow {
+                        set_title: "Signature",
+                        #[watch]
+                        set_subtitle: if let Some(path) = &model.author.signature_file_name { path } else { "" },
+                        // #[watch]
+                        // set_css_classes: if model.author.signature_file_name.is_some() { &["error"] } else { &[""] },
+                        add_suffix = &gtk::Button {
+                            set_margin_all: 10,
+                            set_icon_name: "document-open-symbolic",
+                            connect_clicked[sender] => move |_| sender.output(AuthorFormOutput::PickSignature).unwrap(),
+                        }
+                },
             },
         },
     }
@@ -198,6 +213,7 @@ impl SimpleComponent for AuthorFormModel {
             AuthorFormInput::IbanEdited(value) => {
                 self.author.iban = if value.is_empty() { None } else { Some(value) }
             }
+            AuthorFormInput::Signature(signature) => self.author.signature_file_name = signature,
         }
         sender.output(AuthorFormOutput::AuthorEdited(self.author.clone())).unwrap();
     }

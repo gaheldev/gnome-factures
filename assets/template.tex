@@ -193,6 +193,30 @@ code APE: {{{invoice.author.ape}}} \\
 Dispensé de précompte,  voir page 3
 {{/if}}
 
+% TEMPLATE devis
+{{#if invoice.is_devis}}
+\vspace{0.6cm}
+\begin{minipage}{0.45\textwidth}
+	\begin{signature}[Le client]
+		{\color{lightgray}mention 'bon pour accord'\\ \\ \\ \\ date et signature}\\
+		\vspace{1cm}
+	\end{signature}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+	\begin{signature}[Gaël Le Godais]
+		\center
+		{{#if invoice.author.signature_file_name}}
+		% \vspace{0.85cm} % about equal sized boxes
+		\includegraphics[width=0.3\textwidth]{{{override_braces invoice.author.signature_file_name}}}
+		% \vspace{0.85cm} % about equal sized boxes
+		{{else}}
+		% \vspace{3.4cm} % about equal sized boxes
+		\vspace{2cm}
+		{{/if}}
+	\end{signature}
+\end{minipage}
+{{/if}}
 
 
 %======================================
