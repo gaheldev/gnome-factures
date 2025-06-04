@@ -3,6 +3,7 @@ use relm4::prelude::*;
 
 use crate::CFG;
 
+// FIXME: use different tabs for facture and devis
 
 #[derive(Default,Clone)]
 pub struct BillingModel {

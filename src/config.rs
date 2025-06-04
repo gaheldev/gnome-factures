@@ -5,6 +5,7 @@ use serde::Serialize;
 use crate::app::{Author, Client, ClientName};
 
 
+// TODO: add last_devis
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     // TODO: create gui to set output paths

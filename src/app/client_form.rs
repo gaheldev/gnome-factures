@@ -4,6 +4,7 @@ use adw::prelude::*;
 use relm4::prelude::*;
 use relm4_components::simple_adw_combo_row::SimpleComboRow;
 
+// FIXME: use different tabs for existing and new client
 
 pub type ClientName = String;
 
