@@ -33,6 +33,7 @@ pub struct Client {
     pub siret: Option<String>,
     pub tva: Option<String>,
     pub tva_icc: Option<String>,
+    pub custom_field: Option<String>,
 }
 impl Client {
     pub(crate) fn valid(&self) -> bool {
@@ -79,6 +80,7 @@ pub(crate) enum ClientFormInput {
     SiretEdited(String),
     TVAEdited(String),
     TVAICCEdited(String),
+    CustomFieldEdited(String),
 }
 
 // FIXME: sometimes crash when clicking existing client on load
@@ -254,6 +256,7 @@ impl SimpleComponent for ClientFormModel {
                 // },
             },
 
+            #[name(edit_group_2)]
             add = &adw::PreferencesGroup {
                 add = &adw::EntryRow {
                     set_title: "SIRET",
@@ -293,11 +296,38 @@ impl SimpleComponent for ClientFormModel {
 
                     #[track(!model.editing)]
                     #[block_signal(tva_icc_handler)]
-                    set_text: if let Some(tva) = &model.edited_client.tva_icc { tva } else { "" },
+                    set_text: if let Some(tva_icc) = &model.edited_client.tva_icc { tva_icc } else { "" },
 
                     connect_changed[sender] => move |entry_row| {
                         sender.input(ClientFormInput::TVAICCEdited(entry_row.property("text")));
                     } @tva_icc_handler
+                },
+            },
+            add = &adw::PreferencesGroup {
+                set_title: "Informations additionnelles",
+
+                add = &gtk::TextView {
+                    set_height_request: 200,
+                    set_wrap_mode: gtk::WrapMode::Word,
+                    inline_css: "border-radius: 14px; padding: 10px",
+
+                    #[watch]
+                    set_editable: model.editing,
+
+                    #[wrap(Some)]
+                    set_buffer = &gtk::TextBuffer {
+
+                        // TODO: manual block signal as the macro fails here
+                        //       or find a different solution
+
+                        connect_changed[sender] => move |entry| {
+                            sender.input(ClientFormInput::CustomFieldEdited(entry.property("text")));
+                        } @custom_field_handler,
+
+                        // #[track(!model.editing)]
+                        // #[block_signal(test_handler)]
+                        // set_text: if let Some(custom) = &model.edited_client.custom_field { custom } else { "" },
+                    }
                 },
             },
         },
@@ -372,6 +402,14 @@ impl SimpleComponent for ClientFormModel {
                 self.edited_client.tva_icc = if value.is_empty() { None } else { Some(value) };
                 sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone())).unwrap();
             }
+            ClientFormInput::CustomFieldEdited(value) => {
+                if value.is_empty() {
+                    self.edited_client.custom_field = None;
+                } else {
+                    self.edited_client.custom_field = Some(value);
+                }
+                sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone())).unwrap();
+            },
             ClientFormInput::ClientSelected(index) => {
                 self.edited_client = self.client_list[index].clone();
                 self.existing = true;

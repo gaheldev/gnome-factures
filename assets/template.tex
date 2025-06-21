@@ -116,6 +116,8 @@
 {{#if invoice.client.tva}} n° TVA : {{{invoice.client.tva}}} \\ {{/if}}
 % TEMPLATE
 {{#if invoice.client.tva_icc}} n° TVAICC : {{{invoice.client.tva_icc}}} \\ {{/if}}
+% TEMPLATE
+{{#if invoice.client.custom_field}} {{{multiline invoice.client.custom_field}}} \\ {{/if}}
 }
 
 
