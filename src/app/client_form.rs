@@ -316,17 +316,12 @@ impl SimpleComponent for ClientFormModel {
 
                     #[wrap(Some)]
                     set_buffer = &gtk::TextBuffer {
-
-                        // TODO: manual block signal as the macro fails here
-                        //       or find a different solution
-
-                        connect_changed[sender] => move |entry| {
+                        connect_end_user_action[sender] => move |entry| {
                             sender.input(ClientFormInput::CustomFieldEdited(entry.property("text")));
-                        } @custom_field_handler,
+                        },
 
-                        // #[track(!model.editing)]
-                        // #[block_signal(test_handler)]
-                        // set_text: if let Some(custom) = &model.edited_client.custom_field { custom } else { "" },
+                        #[track(!model.editing)]
+                        set_text: if let Some(custom) = &model.edited_client.custom_field { custom } else { "" },
                     }
                 },
             },
