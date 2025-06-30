@@ -31,6 +31,7 @@ pub struct Client {
     pub name: ClientName,
     pub address: Address,
     pub siret: Option<String>,
+    pub code_ape: Option<String>,
     pub tva: Option<String>,
     pub tva_icc: Option<String>,
     pub custom_field: Option<String>,
@@ -78,6 +79,7 @@ pub(crate) enum ClientFormInput {
     CityEdited(String),
     // CountryEdited(String),
     SiretEdited(String),
+    APEEdited(String),
     TVAEdited(String),
     TVAICCEdited(String),
     CustomFieldEdited(String),
@@ -274,6 +276,21 @@ impl SimpleComponent for ClientFormModel {
                 },
 
                 add = &adw::EntryRow {
+                    set_title: "Code APE",
+
+                    #[watch]
+                    set_editable: model.editing,
+
+                    #[track(!model.editing)]
+                    #[block_signal(code_ape_handler)]
+                    set_text: if let Some(code_ape) = &model.edited_client.code_ape { code_ape } else { "" },
+
+                    connect_changed[sender] => move |entry_row| {
+                        sender.input(ClientFormInput::APEEdited(entry_row.property("text")));
+                    } @code_ape_handler
+                },
+
+                add = &adw::EntryRow {
                     set_title: "TVA",
 
                     #[watch]
@@ -388,6 +405,10 @@ impl SimpleComponent for ClientFormModel {
             ClientFormInput::SiretEdited(value) => {
                 self.edited_client.siret = if value.is_empty() { None } else { Some(value) };
                 let _ = sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone()));
+            }
+            ClientFormInput::APEEdited(value) => {
+                self.edited_client.code_ape = if value.is_empty() { None } else { Some(value) };
+                sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone())).unwrap();
             }
             ClientFormInput::TVAEdited(value) => {
                 self.edited_client.tva = if value.is_empty() { None } else { Some(value) };
