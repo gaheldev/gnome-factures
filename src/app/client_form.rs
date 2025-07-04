@@ -27,6 +27,7 @@ impl Address {
 
 #[derive(Debug,Clone,Default)]
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct Client {
     pub name: ClientName,
     pub address: Address,
@@ -34,6 +35,7 @@ pub struct Client {
     pub code_ape: Option<String>,
     pub tva: Option<String>,
     pub tva_icc: Option<String>,
+    pub public_organization: bool,
     pub custom_field: Option<String>,
 }
 impl Client {
@@ -82,6 +84,7 @@ pub(crate) enum ClientFormInput {
     APEEdited(String),
     TVAEdited(String),
     TVAICCEdited(String),
+    PublicOrganizationEdited(bool),
     CustomFieldEdited(String),
 }
 
@@ -258,6 +261,23 @@ impl SimpleComponent for ClientFormModel {
                 // },
             },
 
+            add = &adw::PreferencesGroup {
+                add = &adw::SwitchRow {
+                    set_title: "Client Public",
+
+                    #[watch]
+                    set_activatable: model.editing,
+
+                    #[track(!model.editing)]
+                    #[block_signal(public_organization_handler)]
+                    set_active: model.edited_client.public_organization,
+
+                    connect_active_notify[sender] => move |switch| {
+                        sender.input(ClientFormInput::PublicOrganizationEdited(switch.is_active()));
+                    } @public_organization_handler
+                },
+            },
+
             #[name(edit_group_2)]
             add = &adw::PreferencesGroup {
                 add = &adw::EntryRow {
@@ -416,6 +436,10 @@ impl SimpleComponent for ClientFormModel {
             }
             ClientFormInput::TVAICCEdited(value) => {
                 self.edited_client.tva_icc = if value.is_empty() { None } else { Some(value) };
+                sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone())).unwrap();
+            }
+            ClientFormInput::PublicOrganizationEdited(value) => {
+                self.edited_client.public_organization = value;
                 sender.output(ClientFormOutput::ClientEdited(self.edited_client.clone())).unwrap();
             }
             ClientFormInput::CustomFieldEdited(value) => {

@@ -7,6 +7,7 @@ use crate::app::{Author, Client, ClientName};
 
 // TODO: add last_devis
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Config {
     // TODO: create gui to set output paths
     pub author: Option<Author>,
