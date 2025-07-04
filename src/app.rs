@@ -32,7 +32,9 @@ static AUTHOR_DIALOG_BROKER: MessageBroker<AuthorFormInput> = MessageBroker::new
 pub(crate) enum AppMsg {
     AuthorEdited(Author),
     SignatureSelected(Option<PathBuf>),
+    ComptesAJourSelected(Option<PathBuf>),
     PickSignature,
+    PickComptesAJour,
     BillTypeChanged(BillType),
     BillNumberChanged(String),
     BillNature(String),
@@ -50,6 +52,7 @@ pub(crate) enum AppMsg {
     CompilationError(String),
 
     ResetShowSignatureDialog,
+    ResetShowComptesAJourDialog,
     ResetShowDispenseDialog,
     /// does nothing
     Null,
@@ -77,6 +80,7 @@ pub(crate) struct AppModel {
     is_form_valid: bool,
     status: UpToDate,
     show_signature_dialog: bool,
+    show_comptes_a_jour_dialog: bool,
     show_dispense_dialog: bool,
     show_pdf: bool,
     pdf: Option<PdfFile>,
@@ -242,10 +246,32 @@ impl SimpleComponent for AppModel {
                 .modal(true)
                 .build();
 
+            let snd = sender.clone();
             dialog.open(Some(&widgets.window),
                 Some(&Cancellable::new()),
                 move |file| {
-                    sender.input(AppMsg::SignatureSelected(
+                    snd.input(AppMsg::SignatureSelected(
+                        match file {
+                            Ok(gtk_file) => Some(gtk_file.path().unwrap()),
+                            Err(_) => None,
+                    }
+                    ));
+                },
+            );
+        }
+
+        if model.show_comptes_a_jour_dialog {
+            sender.input(AppMsg::ResetShowComptesAJourDialog);
+            let dialog = gtk::FileDialog::builder()
+                .title("Sélectionner Attestation de Comptes à Jour")
+                .modal(true)
+                .build();
+
+            let snd = sender.clone();
+            dialog.open(Some(&widgets.window),
+                Some(&Cancellable::new()),
+                move |file| {
+                    snd.input(AppMsg::ComptesAJourSelected(
                         match file {
                             Ok(gtk_file) => Some(gtk_file.path().unwrap()),
                             Err(_) => None,
@@ -271,6 +297,7 @@ impl SimpleComponent for AppModel {
             .forward(sender.input_sender(), |msg| match msg {
                 AuthorFormOutput::AuthorEdited(author) => AppMsg::AuthorEdited(author),
                 AuthorFormOutput::PickSignature => AppMsg::PickSignature,
+                AuthorFormOutput::PickComptesAJour => AppMsg::PickComptesAJour,
             });
 
         let billing_init = BillingInit {
@@ -324,6 +351,7 @@ impl SimpleComponent for AppModel {
             is_form_valid: false,
             status: UpToDate::None,
             show_signature_dialog: false,
+            show_comptes_a_jour_dialog: false,
             show_dispense_dialog: false,
             show_pdf: true,
             pdf: None,
@@ -377,6 +405,10 @@ impl SimpleComponent for AppModel {
                 let signature = filepath.map(|filepath| filepath.to_str().unwrap().to_string());
                 AUTHOR_DIALOG_BROKER.send(AuthorFormInput::Signature(signature));
             }
+            AppMsg::ComptesAJourSelected(filepath) => {
+                let attestation = filepath.map(|filepath| filepath.to_str().unwrap().to_string());
+                AUTHOR_DIALOG_BROKER.send(AuthorFormInput::ComptesAJour(attestation));
+            }
             AppMsg::DispenseSelected(filepath) => {
                 self.status = UpToDate::None;
                 self.dispense = filepath;
@@ -392,11 +424,17 @@ impl SimpleComponent for AppModel {
             AppMsg::PickSignature => {
                 self.show_signature_dialog = true
             }
-            AppMsg::PickDispense => {
-                self.show_dispense_dialog = true;
-            }
             AppMsg::ResetShowSignatureDialog => {
                 self.show_signature_dialog = false;
+            }
+            AppMsg::PickComptesAJour => {
+                self.show_comptes_a_jour_dialog = true
+            }
+            AppMsg::ResetShowComptesAJourDialog => {
+                self.show_comptes_a_jour_dialog = false
+            }
+            AppMsg::PickDispense => {
+                self.show_dispense_dialog = true;
             }
             AppMsg::ResetShowDispenseDialog => {
                 self.show_dispense_dialog = false;

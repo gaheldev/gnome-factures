@@ -37,6 +37,7 @@ pub struct Author {
     pub email: Option<String>,
     pub iban: Option<String>,
     pub signature_file_name: Option<String>,
+    pub comptes_a_jour_file_name: Option<String>,
 }
 impl Author {
     pub(crate) fn valid(&self) -> bool {
@@ -63,6 +64,7 @@ pub struct AuthorFormModel {
 pub enum AuthorFormOutput {
     AuthorEdited(Author),
     PickSignature,
+    PickComptesAJour,
 }
 
 #[derive(Debug)]
@@ -79,6 +81,7 @@ pub enum AuthorFormInput {
     // TVAEdited(String),
     IbanEdited(String),
     Signature(Option<String>),
+    ComptesAJour(Option<String>),
 }
 
 /// entry_row!("Name", NameEdited)
@@ -198,6 +201,19 @@ impl SimpleComponent for AuthorFormModel {
                             connect_clicked[sender] => move |_| sender.output(AuthorFormOutput::PickSignature).unwrap(),
                         }
                 },
+
+                add = &adw::ActionRow {
+                        set_title: "Attestation de Comptes à Jour",
+                        #[watch]
+                        set_subtitle: if let Some(path) = &model.author.comptes_a_jour_file_name { path } else { "" },
+                        // #[watch]
+                        // set_css_classes: if model.author.comptes_a_jour_file_name.is_some() { &["error"] } else { &[""] },
+                        add_suffix = &gtk::Button {
+                            set_margin_all: 10,
+                            set_icon_name: "document-open-symbolic",
+                            connect_clicked[sender] => move |_| sender.output(AuthorFormOutput::PickComptesAJour).unwrap(),
+                        }
+                },
             },
         },
     }
@@ -232,6 +248,7 @@ impl SimpleComponent for AuthorFormModel {
                 self.author.iban = if value.is_empty() { None } else { Some(value) }
             }
             AuthorFormInput::Signature(signature) => self.author.signature_file_name = signature,
+            AuthorFormInput::ComptesAJour(comptes_a_jour) => self.author.comptes_a_jour_file_name = comptes_a_jour,
         }
         sender.output(AuthorFormOutput::AuthorEdited(self.author.clone())).unwrap();
     }
