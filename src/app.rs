@@ -13,6 +13,8 @@ mod client;
 mod address;
 mod editable_combo_row;
 mod client_form;
+mod client_view;
+mod client_selector_group;
 mod products_view;
 mod billing_view;
 mod pdf_viewer;
@@ -22,6 +24,7 @@ pub use product::Product;
 pub use address::Address;
 pub use client::{Client, ClientName};
 use client_form::{ClientFormModel, ClientFormOutput};
+use client_view::{ClientViewModel, ClientViewOutput};
 use products_view::ProductsModel;
 pub use billing_view::{BillType, BillingModel, BillingOutput, BillingInput};
 use crate::{latex::{InvoiceData, PdfFile, Template}, APP_NAME};
@@ -74,7 +77,7 @@ pub(crate) struct AppModel {
     pending_compilation: bool,
 
     author_view: Controller<AuthorFormModel>,
-    client_form: Controller<ClientFormModel>,
+    client_view: Controller<ClientViewModel>,
     products_view: Controller<ProductsModel>,
     billing_view: Controller<BillingModel>,
     pdf_viewer: Controller<PdfViewerModel>,
@@ -155,7 +158,7 @@ impl SimpleComponent for AppModel {
                         set_content = &adw::ViewStack {
                             add_titled_with_icon[Some("author"), "Auteur", "avatar-default-symbolic"] = model.author_view.widget(),
                             add_titled_with_icon[Some("bill"), "Facture", "document-edit-symbolic"] = model.billing_view.widget(),
-                            add_titled_with_icon[Some("client"), "Client", "user-info-symbolic"] = model.client_form.widget(),
+                            add_titled_with_icon[Some("client"), "Client", "user-info-symbolic"] = model.client_view.widget(),
                             add_titled_with_icon[Some("products"), "Produits", "view-list-bullet-symbolic"] = model.products_view.widget(),
                         },
 
@@ -295,11 +298,11 @@ impl SimpleComponent for AppModel {
                 BillingOutput::PickDispense => AppMsg::PickDispense,
             });
 
-        let client_form: Controller<ClientFormModel> =
-        ClientFormModel::builder()
+        let client_view: Controller<ClientViewModel> =
+        ClientViewModel::builder()
             .launch(cfg.clients.values().cloned().collect())
             .forward(sender.input_sender(), |msg| match msg {
-                ClientFormOutput::ClientEdited(client) => AppMsg::ClientEdited(client),
+                ClientViewOutput::Selected(client) => AppMsg::ClientEdited(client),
             });
 
         let products_view: Controller<ProductsModel> =
@@ -322,7 +325,7 @@ impl SimpleComponent for AppModel {
 
             author_view,
             billing_view,
-            client_form,
+            client_view,
             products_view,
             pdf_viewer,
             is_form_valid: false,
