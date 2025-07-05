@@ -4,52 +4,11 @@ use adw::prelude::*;
 use relm4::prelude::*;
 use relm4_components::simple_adw_combo_row::SimpleComboRow;
 
+use crate::app::{Client, ClientName};
+use crate::app::editable_combo_row::{EditableComboInput, EditableComboOutput, EditableComboRow};
+
 // FIXME: use different tabs for existing and new client
 
-pub type ClientName = String;
-
-#[derive(Debug,Clone,Default)]
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct Address {
-    pub number_and_street: String,
-    pub postcode: String,
-    pub city: String,
-    // country: String,
-}
-impl Address {
-    pub(crate) fn valid(&self) -> bool {
-        if self.number_and_street.is_empty() { return false; }
-        if self.postcode.is_empty() { return false; }
-        if self.city.is_empty() { return false; }
-        true
-    }
-}
-
-#[derive(Debug,Clone,Default)]
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct Client {
-    pub name: ClientName,
-    pub address: Address,
-    pub siret: Option<String>,
-    pub code_ape: Option<String>,
-    pub tva: Option<String>,
-    pub tva_icc: Option<String>,
-    pub custom_field: Option<String>,
-}
-impl Client {
-    pub(crate) fn valid(&self) -> bool {
-        if self.name.is_empty() { return false; }
-        if !self.address.valid() { return false; }
-        true
-    }
-}
-
-impl fmt::Display for Client {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Customize so only `x` and `y` are denoted.
-        write!(f, "{}", self.name)
-    }
-}
 
 pub(crate) struct ClientFormModel {
     client_list: Vec<Client>,

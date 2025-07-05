@@ -9,6 +9,9 @@ use relm4::{prelude::*, MessageBroker};
 
 mod author_view;
 mod product;
+mod client;
+mod address;
+mod editable_combo_row;
 mod client_form;
 mod products_view;
 mod billing_view;
@@ -16,8 +19,9 @@ mod pdf_viewer;
 
 pub use author_view::{Author, AuthorFormInput, AuthorFormOutput, AuthorFormModel};
 pub use product::Product;
+pub use address::Address;
+pub use client::{Client, ClientName};
 use client_form::{ClientFormModel, ClientFormOutput};
-pub use client_form::{Client, ClientName};
 use products_view::ProductsModel;
 pub use billing_view::{BillType, BillingModel, BillingOutput, BillingInput};
 use crate::{latex::{InvoiceData, PdfFile, Template}, APP_NAME};
