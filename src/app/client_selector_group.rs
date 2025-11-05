@@ -48,6 +48,7 @@ impl SimpleComponent for ClientSelectorGroupModel {
                     set_focus_on_click: false,
                     set_has_frame: false,
                     set_has_tooltip: true,
+                    #[watch] set_sensitive: model.current_index != None,
 
                     add_css_class: "circular",
 
@@ -82,6 +83,7 @@ impl SimpleComponent for ClientSelectorGroupModel {
     ) -> ComponentParts<Self> {
 
         let active_index = None;
+        let is_client_list_empty = client_list.is_empty();
 
         let client_row: Controller<SimpleComboRow<Client>> =
         SimpleComboRow::builder()
@@ -98,7 +100,11 @@ impl SimpleComponent for ClientSelectorGroupModel {
             client_row,
             current_index: active_index,
         };
-        sender.input_sender().emit(ClientSelectorGroupInput::Selected(0));
+
+        if !is_client_list_empty {
+            sender.input_sender().emit(ClientSelectorGroupInput::Selected(0));
+        }
+
         let widgets = view_output!();
 
         ComponentParts { model, widgets }

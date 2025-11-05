@@ -116,10 +116,10 @@ impl SimpleComponent for ClientViewModel {
                 self.client_form.emit(ClientFormInput::Create);
             },
             ClientViewInput::Edit => {
-                self.show_edit = true;
-                self.client_form.emit(ClientFormInput::Edit(
-                    self.current_client.clone().expect("User shouldn't be able to click edit button if no client is selected")
-                ));
+                if let Some(client) = self.current_client.clone() {
+                    self.show_edit = true;
+                    self.client_form.emit(ClientFormInput::Edit(client));
+                };
             },
         }
     }
