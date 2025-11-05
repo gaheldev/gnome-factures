@@ -46,6 +46,7 @@ pub(crate) enum AppMsg {
     Diffuseur(bool),
     DispenseSelected(Option<PathBuf>),
     PickDispense,
+    ClientListEdited(Vec<Client>),
     ClientEdited(Client),
     ProductsEdited(Vec<Product>),
 
@@ -302,6 +303,7 @@ impl SimpleComponent for AppModel {
         ClientViewModel::builder()
             .launch(cfg.clients.values().cloned().collect())
             .forward(sender.input_sender(), |msg| match msg {
+                ClientViewOutput::ClientListEdited(client_list) => AppMsg::ClientListEdited(client_list),
                 ClientViewOutput::Selected(client) => AppMsg::ClientEdited(client),
             });
 
@@ -359,6 +361,10 @@ impl SimpleComponent for AppModel {
                 CFG.lock().unwrap().author = Some(self.author.clone());
                 confy::store(APP_NAME, None, CFG.lock().unwrap().clone()).unwrap();
             }
+            AppMsg::ClientListEdited(client_list) => {
+                CFG.lock().unwrap().set_clients(client_list);
+                confy::store(APP_NAME, None, CFG.lock().unwrap().clone()).unwrap();
+            }
             AppMsg::ClientEdited(client) => {
                 self.status = UpToDate::None;
                 self.client = client;
@@ -412,6 +418,8 @@ impl SimpleComponent for AppModel {
                 self.status = UpToDate::None;
                 self.products = products;
             }
+            // FIXME: use a menu to choose export destination
+            // currently use a default destination that may not exist -> crash
             AppMsg::Export => {
                 // add client to the list of clients
                 CFG.lock().unwrap().clients.insert(self.client.name.clone(), self.client.clone());

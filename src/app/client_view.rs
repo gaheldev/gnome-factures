@@ -18,6 +18,7 @@ pub(crate) struct ClientViewModel {
 
 #[derive(Debug)]
 pub(crate) enum ClientViewOutput {
+    ClientListEdited(Vec<Client>),
     Selected(Client),
 }
 
@@ -25,6 +26,7 @@ pub(crate) enum ClientViewOutput {
 pub(crate) enum ClientViewInput {
     Create,
     Edit,
+    ClientListEdited(Vec<Client>),
     Selected(Client),
     Edited(Client),
     Created(Client),
@@ -68,6 +70,7 @@ impl SimpleComponent for ClientViewModel {
         let client_selector = ClientSelectorGroupModel::builder()
             .launch(clients.clone())
             .forward(sender.input_sender(), |output| match output {
+                ClientSelectorGroupOutput::ClientListEdited(client_list) => ClientViewInput::ClientListEdited(client_list),
                 ClientSelectorGroupOutput::Selected(client) => ClientViewInput::Selected(client),
                 ClientSelectorGroupOutput::Edit => ClientViewInput::Edit,
                 ClientSelectorGroupOutput::Create => ClientViewInput::Create,
@@ -98,6 +101,11 @@ impl SimpleComponent for ClientViewModel {
         match message {
             ClientViewInput::ClosedForm => {
                 self.show_edit = false;
+            },
+            ClientViewInput::ClientListEdited(client_list) => {
+                // FIXME: use a singleton instead?
+                self.clients = client_list.clone();
+                sender.output(ClientViewOutput::ClientListEdited(client_list)).unwrap();
             },
             ClientViewInput::Edited(client) => {
                 self.show_edit = false;

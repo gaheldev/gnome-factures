@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-use std::path::PathBuf;
+use crate::app::{Author, Client, ClientName};
 use serde::Deserialize;
 use serde::Serialize;
-use crate::app::{Author, Client, ClientName};
-
+use std::collections::HashMap;
+use std::path::PathBuf;
 
 // TODO: add last_devis
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,9 +43,21 @@ impl Config {
 
         Ok(cfg)
     }
+
+    pub fn set_clients(&mut self, client_list: Vec<Client>) {
+        self.clients = {
+            let mut map = HashMap::new();
+            for client in client_list {
+                map.insert(client.name.clone(), client);
+            }
+            map
+        };
+    }
 }
 
-// fn vec_to_map(client_list: Vec<Client>) -> std::collections::HashMap<std::string::String, app::client_form::Client> {
+// fn vec_to_map(
+//     client_list: Vec<Client>,
+// ) -> std::collections::HashMap<std::string::String, app::client_form::Client> {
 //     let mut map = HashMap::new();
 //     for client in client_list {
 //         map.insert(client.name, client);

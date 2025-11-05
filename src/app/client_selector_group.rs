@@ -18,6 +18,7 @@ pub(crate) struct ClientSelectorGroupModel {
 pub(crate) enum ClientSelectorGroupOutput {
     /// fired whenever a client is selected, created or modified
     Selected(Client),
+    ClientListEdited(Vec<Client>),
     Create,
     Edit,
 }
@@ -116,6 +117,8 @@ impl SimpleComponent for ClientSelectorGroupModel {
                 self.client_list.push(client);
                 self.current_index = Some(self.client_list.len()-1);
                 self.update_combo();
+                // update client list
+                sender.output(ClientSelectorGroupOutput::ClientListEdited(self.client_list.clone())).unwrap();
                 // select the new client
                 sender.input(ClientSelectorGroupInput::Selected(self.current_index.unwrap()));
             },
@@ -124,6 +127,7 @@ impl SimpleComponent for ClientSelectorGroupModel {
                 let index = self.current_index.expect("Shouldn't be able to edit when there's no client");
                 self.client_list[index] = self.client.clone();
                 self.update_combo();
+                sender.output(ClientSelectorGroupOutput::ClientListEdited(self.client_list.clone())).unwrap();
                 sender.output(ClientSelectorGroupOutput::Selected(self.client.clone())).unwrap();
             },
             ClientSelectorGroupInput::Selected(index) => {
